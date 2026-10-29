@@ -1,0 +1,676 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>G03 — Bộ lọc trung vị ba điểm · Ghi chú thực hiện</title>
+<style>
+:root{
+  --bg:#ffffff; --fg:#1a1d21; --muted:#5c6570; --line:#e3e7eb;
+  --accent:#1f5fa9; --accent-soft:#eef4fb; --code-bg:#f5f7f9;
+  --ok:#137a4d; --ok-bg:#e8f6ee; --warn:#8a5a00; --warn-bg:#fdf4e2;
+  --bad:#a52020; --bad-bg:#fceded; --open:#7a5ba8; --open-bg:#f3eefa;
+  --maxw:960px;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#15181c; --fg:#e6e9ec; --muted:#98a2ad; --line:#2a2f36;
+    --accent:#6fa8e0; --accent-soft:#1c2733; --code-bg:#1b1f24;
+    --ok:#5cc08d; --ok-bg:#16291f; --warn:#d8a54a; --warn-bg:#2a2314;
+    --bad:#e88b8b; --bad-bg:#2b1a1a; --open:#b79ad6; --open-bg:#241d2e;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#15181c; --fg:#e6e9ec; --muted:#98a2ad; --line:#2a2f36;
+  --accent:#6fa8e0; --accent-soft:#1c2733; --code-bg:#1b1f24;
+  --ok:#5cc08d; --ok-bg:#16291f; --warn:#d8a54a; --warn-bg:#2a2314;
+  --bad:#e88b8b; --bad-bg:#2b1a1a; --open:#b79ad6; --open-bg:#241d2e;
+}
+*{box-sizing:border-box}
+html{scroll-behavior:smooth}
+body{
+  margin:0; background:var(--bg); color:var(--fg);
+  font:16px/1.7 -apple-system,BlinkMacSystemFont,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  -webkit-text-size-adjust:100%;
+}
+.wrap{max-width:var(--maxw); margin:0 auto; padding:0 16px 96px}
+header.doc{
+  border-bottom:1px solid var(--line); margin-bottom:28px; padding:36px 0 22px;
+}
+header.doc .eyebrow{
+  font-size:12px; letter-spacing:.14em; text-transform:uppercase;
+  color:var(--muted); font-weight:600; margin-bottom:10px;
+}
+header.doc h1{font-size:clamp(24px,4.4vw,34px); line-height:1.25; margin:0 0 14px}
+.badges{display:flex; flex-wrap:wrap; gap:7px; margin-top:6px}
+.badge{
+  font-size:12.5px; padding:3px 10px; border-radius:999px;
+  border:1px solid var(--line); color:var(--muted); background:var(--accent-soft);
+  white-space:nowrap;
+}
+.badge.ok{color:var(--ok); background:var(--ok-bg); border-color:transparent}
+.badge.warn{color:var(--warn); background:var(--warn-bg); border-color:transparent}
+.badge.bad{color:var(--bad); background:var(--bad-bg); border-color:transparent}
+.badge.open{color:var(--open); background:var(--open-bg); border-color:transparent}
+nav.toc{
+  border:1px solid var(--line); border-radius:10px; padding:16px 20px;
+  margin:0 0 32px; background:var(--accent-soft);
+}
+nav.toc p{margin:0 0 8px; font-weight:700; font-size:13px; letter-spacing:.06em;
+  text-transform:uppercase; color:var(--muted)}
+nav.toc ul{margin:0; padding-left:20px}
+nav.toc li{margin:3px 0}
+nav.toc a{color:var(--fg); text-decoration:none}
+nav.toc a:hover{color:var(--accent); text-decoration:underline}
+nav.toc ul ul{padding-left:18px; font-size:14.5px}
+h2{font-size:22px; margin:40px 0 12px; padding-bottom:6px; border-bottom:1px solid var(--line)}
+h3{font-size:18px; margin:28px 0 8px}
+h4{font-size:16px; margin:22px 0 6px; color:var(--muted)}
+p{margin:12px 0}
+a{color:var(--accent)}
+ul,ol{padding-left:24px}
+li{margin:4px 0}
+code{
+  font-family:ui-monospace,SFMono-Regular,"SF Mono",Menlo,Consolas,monospace;
+  font-size:.9em; background:var(--code-bg); padding:1.5px 5px; border-radius:4px;
+}
+pre{
+  background:var(--code-bg); border:1px solid var(--line); border-radius:8px;
+  padding:14px 16px; overflow-x:auto; line-height:1.55; font-size:13.5px;
+}
+pre code{background:none; padding:0; font-size:inherit}
+blockquote{
+  margin:16px 0; padding:2px 18px; border-left:3px solid var(--accent);
+  background:var(--accent-soft); border-radius:0 8px 8px 0; color:var(--fg);
+}
+blockquote p{margin:10px 0}
+.tablewrap{overflow-x:auto; margin:16px 0; -webkit-overflow-scrolling:touch}
+table{border-collapse:collapse; width:100%; font-size:14.5px; min-width:420px}
+th,td{border:1px solid var(--line); padding:7px 11px; text-align:left; vertical-align:top}
+th{background:var(--accent-soft); font-weight:650; white-space:nowrap}
+tbody tr:nth-child(even) td{background:color-mix(in srgb, var(--code-bg) 55%, transparent)}
+hr{border:0; border-top:1px solid var(--line); margin:34px 0}
+footer.doc{
+  margin-top:56px; padding-top:18px; border-top:1px solid var(--line);
+  color:var(--muted); font-size:13.5px;
+}
+.themebtn{
+  position:fixed; right:14px; bottom:14px; z-index:10;
+  border:1px solid var(--line); background:var(--bg); color:var(--muted);
+  border-radius:999px; padding:8px 14px; font-size:13px; cursor:pointer;
+}
+.themebtn:hover{color:var(--fg)}
+@media (max-width:640px){
+  .wrap{padding:0 16px 72px}
+  header.doc{padding:26px 0 18px}
+  nav.toc{padding:14px 16px}
+}
+@media print{
+  .themebtn{display:none}
+  nav.toc{break-inside:avoid}
+  pre,table,blockquote{break-inside:avoid}
+  body{font-size:11pt}
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+<header class="doc">
+  <div class="eyebrow">RTL2GDS · Đề G03 · Ghi chú thực hiện</div>
+  <h1>G03 — Bộ lọc trung vị ba điểm · Ghi chú thực hiện</h1>
+  <div class="badges"><span class="badge ">🔧 Đã vá và xác minh lại</span><span class="badge ">G · Xử lý tín hiệu số đơn giản</span><span class="badge ">Độ khó: Trung bình</span><span class="badge ">Loại mạch: Tuần tự</span><span class="badge ok">Mô phỏng: PASS</span><span class="badge ">Tổng hợp: 188 cell · 27 FF</span><span class="badge ">Đường tới hạn: 7,82 ns</span><span class="badge warn">Physical design: CHƯA CHẠY</span></div>
+</header>
+<nav class="toc"><p>Mục lục</p><ul><li><a href="#1-bai-toan-nay-thuc-chat-la-gi">1. Bài toán này thực chất là gì</a></li><li><a href="#2-ban-chat-ky-thuat-co-che-hoat-dong">2. Bản chất kỹ thuật — cơ chế hoạt động</a></li><li><a href="#3-doc-ma-nguon-rtl-lam-gi-tung-dong-quan-trong">3. Đọc mã nguồn: RTL làm gì, từng dòng quan trọng</a></li><li><a href="#4-vi-sao-chon-kien-truc-nay">4. Vì sao chọn kiến trúc này</a></li><li><a href="#5-cach-thuc-hien-lo-trinh-8-buoc-tu-dac-ta-toi-gdsii">5. Cách thực hiện — lộ trình 8 bước từ đặc tả tới GDSII</a></li><li><a href="#6-so-lieu-that-da-do-duoc-va-cach-doc-chung">6. Số liệu thật đã đo được và cách đọc chúng</a></li><li><a href="#7-tra-loi-cac-cau-hoi-ky-thuat-cua-charter-muc-2">7. Trả lời các câu hỏi kỹ thuật của Charter (mục 2)</a></li><li><a href="#8-tra-loi-cau-phan-tich-rieng-charter-muc-9">8. Trả lời câu phân tích riêng (Charter mục 9)</a></li><li><a href="#9-nhung-cho-sinh-vien-hay-sai-va-cach-phat-hien">9. Những chỗ sinh viên hay sai và cách phát hiện</a></li><li><a href="#10-cau-hoi-mentor-nen-dat-khi-bao-ve">10. Câu hỏi mentor nên đặt khi bảo vệ</a></li><li><a href="#11-gioi-han-da-chung-minh-duoc-gi-chua-chung-minh-duoc-gi">11. Giới hạn: đã chứng minh được gì, chưa chứng minh được gì</a></li></ul></nav>
+<main>
+<h2 id="1-bai-toan-nay-thuc-chat-la-gi">1. Bài toán này thực chất là gì</h2>
+<p>Bề ngoài G03 là "tìm số ở giữa của ba số". Thực chất nó là bài toán <strong>lọc hạng-thứ tự
+(rank-order filtering) trên một dòng dữ liệu</strong>, và nó tồn tại để giải quyết đúng một thứ mà
+bộ lọc tuyến tính <strong>không thể</strong> giải quyết: <strong>nhiễu xung</strong>.</p>
+<p>Bối cảnh của Charter mục 1 nói rõ vì sao: cảm biến áp suất công nghiệp bị nhiễu xung do relay
+đóng ngắt, động cơ khởi động, phóng tĩnh điện. Đầu ra của khối đi thẳng vào tầng so sánh
+ngưỡng → van an toàn. Một xung giả làm trung bình vọt lên có thể <strong>kích van sai</strong> — đó là hậu
+quả vật lý, không chỉ là một số xấu trên màn hình.</p>
+<p>Điểm mấu chốt về bản chất: <strong>trung bình là hàm tuyến tính, trung vị là hàm phi tuyến</strong>. Với
+trung bình, mọi mẫu đều <strong>đi vào phép tính</strong> và ảnh hưởng của một mẫu hỏng biên độ <code>Δ</code> là
+<code>Δ/N</code> — <strong>không bị chặn</strong>. Với trung vị, mẫu chỉ đi vào <strong>so sánh</strong> rồi bị loại nếu nó nằm ở
+rìa; biên độ của nó <strong>không hề xuất hiện</strong> trong kết quả. Thuật ngữ thống kê gọi đây là
+<em>breakdown point</em>: trung bình có 0 %, trung vị ba điểm có ~33 %.</p>
+<p>Nhưng bài toán cũng mang theo một ràng buộc cứng: <strong>cấm sắp xếp bằng vòng lặp phần mềm</strong>.
+Đó không phải sở thích của giảng viên — đó là vì mục tiêu học tập là <strong>nhìn thấy</strong> mạng sắp
+xếp, đếm được số bộ so sánh và số tầng. Một vòng <code>for</code> + <code>swap</code> sẽ được công cụ bung ra thành
+đúng mạng đó, chạy được, nhưng cấu trúc trở nên <strong>vô hình trong mã</strong>.</p>
+<h2 id="2-ban-chat-ky-thuat-co-che-hoat-dong">2. Bản chất kỹ thuật — cơ chế hoạt động</h2>
+<p>Cơ chế cốt lõi là <strong>mạng compare-exchange</strong>. Một compare-exchange <code>CE(x,y)</code> trả về cặp đã sắp
+<code>(min(x,y), max(x,y))</code>. Mạng trung vị ba phần tử cần đúng <strong>ba</strong> CE:</p>
+<pre><code>   CE1 = CE(a, b)         -&gt; lo1 = min(a,b),    hi1 = max(a,b)
+   CE2 = CE(hi1, c)       -&gt; lo2 = min(hi1,c)
+   CE3 = CE(lo1, lo2)     -&gt; med3 = max(lo1,lo2)      &lt;- KET QUA
+
+   median3(a,b,c) = max( min(a,b), min(max(a,b), c) )
+</code></pre>
+<p>Đây mới là nút thắt cần chỉ ra, và nó <strong>không</strong> nằm ở chỗ người ta tưởng:</p>
+<blockquote>
+<p><strong>Ba CE này BẮT BUỘC nối tiếp nhau.</strong> Phải biết <code>max(a,b)</code> mới so được với <code>c</code>; phải có
+<code>lo2</code> mới so được với <code>lo1</code>. Và mỗi CE chứa một <strong>bộ so sánh độ lớn 8 bit</strong>, mà so sánh
+8 bit <strong>không phải một cổng</strong> — nó là một phép trừ có mượn, tức một <strong>chuỗi mượn 8 tầng
+nối tiếp</strong>. Vậy đường dữ liệu dài nhất là <strong>ba chuỗi mượn mắc nối tiếp</strong>, chứ không phải
+"ba phép so sánh".</p>
+</blockquote>
+<p>Số liệu thật xác nhận rất đẹp: netlist có <strong>15 cell <code>maj3_1</code></strong> (<code>maj3</code> là cell "đa số ba
+ngõ" — chính là hàm sinh mượn <code>borrow[i+1] = maj(~a[i], b[i], borrow[i])</code>). Và <strong>cả 15 cell
+đó đều nằm trên MỘT đường tới hạn</strong>: 6 của CMP1, 2 của CMP2, 7 của CMP3. Đếm từ
+<code>synth_stat.txt</code> = 15; đếm từ danh sách cell của đường tới hạn = 15. Không một <code>maj3</code> nào
+nằm ngoài.</p>
+<p>Hệ quả là chân dung điện của G03 hoàn toàn khác họ hàng trung bình của nó: <strong>sâu và hẹp</strong>.
+Đường tới hạn <strong>7,82 ns</strong> — chiếm <strong>78,2 %</strong> chu kỳ giả định 10 ns — trong khi đường phụ
+(<code>valid_in → valid_out</code>) chỉ <strong>1,22 ns</strong>. Chênh nhau <strong>6,4 lần</strong>.</p>
+<h2 id="3-doc-ma-nguon-rtl-lam-gi-tung-dong-quan-trong">3. Đọc mã nguồn: RTL làm gì, từng dòng quan trọng</h2>
+<p><strong>(a) Mạng sắp xếp, dòng 19–29:</strong></p>
+<pre><code class="language-systemverilog">    // Compare-exchange stage 1: a,b
+    assign lo1 = (a &lt;= b) ? a : b;
+    assign hi1 = (a &lt;= b) ? b : a;
+    // Compare-exchange stage 2: hi1,c
+    assign lo2 = (hi1 &lt;= c) ? hi1 : c;
+    assign hi2 = (hi1 &lt;= c) ? c : hi1;
+    // Compare-exchange stage 3: lo1,lo2
+    assign lo3 = (lo1 &lt;= lo2) ? lo1 : lo2;
+    assign med3 = (lo1 &lt;= lo2) ? lo2 : lo1;
+</code></pre>
+<p>Sáu <code>assign</code>, <strong>ba</strong> biểu thức so sánh. Dùng <code>&lt;=</code> (không nghiêm ngặt) <strong>nhất quán ở cả ba</strong>
+là điều kiện để các ca trùng lặp (<code>median3(2,9,2)</code>) ra đúng. Nếu một trong ba đổi thành <code>&lt;</code>,
+mạng vẫn "gần đúng" nhưng sai ở biên.</p>
+<p>Chú ý <code>hi2</code> và <code>lo3</code> <strong>không bao giờ được đọc</strong> — đó là <strong>mã chết có chủ đích</strong>: viết đầy đủ
+một CE giữ mã đối xứng và dễ đọc, và Yosys loại bỏ chúng nên <strong>không tốn cell nào</strong>. Hệ quả
+cho câu hỏi Charter mục 2 câu 1: có <strong>hai đáp án đúng</strong> — 6 mux <strong>viết ra</strong>, 4 mux <strong>sống</strong>.</p>
+<p><strong>(b) Thanh ghi dịch, dòng 46–47:</strong></p>
+<pre><code class="language-systemverilog">                hist0_q &lt;= hist1_q;
+                hist1_q &lt;= sample_in;
+</code></pre>
+<p>Hai dòng này thay thế toàn bộ hạ tầng của G01/G02 (bộ đệm vòng + con trỏ + cây mux đọc).
+Với <code>N = 3</code> (chỉ cần nhớ <strong>hai</strong> mẫu), thanh ghi dịch là lựa chọn rõ ràng đúng — và nó giải
+thích vì sao G03 chỉ có <strong>27 flip-flop</strong> so với 94 của G02.</p>
+<p><strong>(c) Ngưỡng phát hành — dòng 49–55, chỗ có LỖI:</strong></p>
+<pre><code class="language-systemverilog">                if (count_q &lt; 2'd2)
+                    count_q &lt;= count_q + 2'd1;
+
+                if (count_q &gt;= 2'd1) begin      // &lt;&lt;&lt;&lt; SAI: phai la 2'd2
+                    valid_out &lt;= 1'b1;
+                    median_out &lt;= med3;
+                end
+</code></pre>
+<p>Hai dòng cách nhau <strong>ba dòng</strong> dùng <strong>hai hằng số khác nhau</strong> cho cùng khái niệm "cửa sổ đã
+đầy". Ngưỡng đúng là <code>N − 1 = 2</code>. Phán xử đầy đủ: <code>05_VERIFICATION/known_issues.md</code>.</p>
+<p><strong>(d) Bí danh, dòng 31–33:</strong> <code>assign a = hist0_q; assign b = hist1_q; assign c = sample_in;</code>
+— <strong>0 cell</strong>. Thú vị: Yosys coi <code>a</code>/<code>b</code> là tên chính và <strong>đặt tên flip-flop trong netlist là
+<code>a[0..7]</code>, <code>b[0..7]</code></strong> chứ không phải <code>hist0_q</code>/<code>hist1_q</code>. Biết điều này mới đọc được STA.</p>
+<h2 id="4-vi-sao-chon-kien-truc-nay">4. Vì sao chọn kiến trúc này</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Tiêu chí</th>
+<th>Mạng CE 3 tầng (đã chọn)</th>
+<th>Dùng lại 1 CE ba lần</th>
+<th>Vòng lặp hành vi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Bộ so sánh</td>
+<td>3</td>
+<td>1</td>
+<td>ẩn (công cụ bung ra)</td>
+</tr>
+<tr>
+<td>Chu kỳ/mẫu</td>
+<td>1</td>
+<td>3</td>
+<td>1</td>
+</tr>
+<tr>
+<td>Cần FSM?</td>
+<td>❌</td>
+<td>✅</td>
+<td>❌</td>
+</tr>
+<tr>
+<td>Đếm được cấu trúc từ mã?</td>
+<td>✅</td>
+<td>✅</td>
+<td>❌ <strong>không</strong></td>
+</tr>
+<tr>
+<td>Charter cho phép?</td>
+<td>✅</td>
+<td>⚠️ mất tính "tổ hợp" (mục 10)</td>
+<td>❌ <strong>cấm</strong> (mục 10)</td>
+</tr>
+</tbody>
+</table></div>
+<p>Với <code>N = 3</code>, mạng song song là lựa chọn hiển nhiên đúng: chỉ 3 CE, không đáng tuần tự hoá,
+và nó giữ được <strong>tính đọc được</strong> mà Charter đòi hỏi.</p>
+<h2 id="5-cach-thuc-hien-lo-trinh-8-buoc-tu-dac-ta-toi-gdsii">5. Cách thực hiện — lộ trình 8 bước từ đặc tả tới GDSII</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Bước</th>
+<th>Việc</th>
+<th>Trạng thái thật của G03</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Suy phương trình <code>median3</code> + chứng minh vét cạn 6 hoán vị</td>
+<td>✅ <code>functional_spec.md</code> §3.1</td>
+</tr>
+<tr>
+<td>2</td>
+<td>Viết mô hình chuẩn Python <strong>cùng với</strong> mô hình trung bình để so</td>
+<td>✅ <code>reference_model.py</code> — <strong>PASS 5/5</strong></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Viết RTL: mạng CE tường minh + thanh ghi dịch</td>
+<td>⚠️ viết rồi, <strong>có lỗi ngưỡng</strong></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Viết testbench phủ Charter mục 8</td>
+<td>✅ tốt — <strong>bắt được lỗi ngay ca thứ hai</strong></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Mô phỏng RTL</td>
+<td>🔴 <strong>RAN_WITH_ISSUES</strong> — dừng tại <code>t = 36</code></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Tổng hợp</td>
+<td>✅ 189 cell · 27 FF · 1576,512 µm²</td>
+</tr>
+<tr>
+<td>7</td>
+<td>STA + công suất</td>
+<td>✅ arrival 7,82 ns · slack 2,10 ns · 1,76e-04 W</td>
+</tr>
+<tr>
+<td>8</td>
+<td>P&amp;R → DRC/LVS → GDSII</td>
+<td>⬜ <strong>CHƯA CHẠY</strong></td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p>⚠️ Với G03, bước 6–7 đang mô tả một mạch <strong>chưa đúng chức năng</strong>. Sau khi vá, <strong>phải chạy
+lại toàn bộ bước 6–7</strong> — khác với G02, nơi bản vá chỉ đụng testbench.</p>
+</blockquote>
+<h2 id="6-so-lieu-that-da-do-duoc-va-cach-doc-chung">6. Số liệu thật đã đo được và cách đọc chúng</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Chỉ số</th>
+<th style="text-align: right;">Giá trị</th>
+<th>Nguồn</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Số cell</td>
+<td style="text-align: right;">189</td>
+<td><code>synth_stat.txt</code></td>
+</tr>
+<tr>
+<td>Flip-flop</td>
+<td style="text-align: right;">27</td>
+<td>như trên</td>
+</tr>
+<tr>
+<td>Diện tích</td>
+<td style="text-align: right;">1576,512 µm²</td>
+<td>như trên</td>
+</tr>
+<tr>
+<td>Startpoint → Endpoint</td>
+<td style="text-align: right;"><code>_341_</code> (= <code>b[0]</code> = <code>hist1_q[0]</code>) → <code>_326_</code> (= <code>median_out[1]</code>)</td>
+<td><code>timing_report_max.txt</code></td>
+</tr>
+<tr>
+<td>Data arrival</td>
+<td style="text-align: right;"><strong>7,82 ns</strong></td>
+<td>như trên</td>
+</tr>
+<tr>
+<td>Slack</td>
+<td style="text-align: right;"><strong>2,10 ns</strong> (MET)</td>
+<td>như trên</td>
+</tr>
+<tr>
+<td>Số cell trên đường tới hạn</td>
+<td style="text-align: right;"><strong>28</strong>, trong đó <strong>15 <code>maj3_1</code></strong></td>
+<td>như trên</td>
+</tr>
+<tr>
+<td>WNS / TNS</td>
+<td style="text-align: right;">0,00 / 0,00</td>
+<td><code>wns.txt</code>, <code>tns.txt</code></td>
+</tr>
+<tr>
+<td>Hold slack nhỏ nhất</td>
+<td style="text-align: right;">0,43 ns (MET)</td>
+<td><code>timing_report_min.txt</code></td>
+</tr>
+<tr>
+<td>Công suất</td>
+<td style="text-align: right;">1,76e-04 W (tổ hợp <strong>32,0 %</strong> · tuần tự 68,0 %)</td>
+<td><code>power_report.txt</code></td>
+</tr>
+</tbody>
+</table></div>
+<p><strong>Những con số này CHỨNG MINH:</strong>
+- Mạng sắp xếp tổng hợp được ra standard cell sky130 thật; <strong>27 flip-flop khớp chính xác</strong>
+  tính tay (8 + 8 + 2 + 8 + 1), không dư không thiếu.
+- Charter mục 10 nói <em>"16 ô nhớ (2 mẫu trước) + mạng sắp xếp </em><em>tổ hợp</em><em>"</em> — cả hai đều đúng:
+  16 FF cho cửa sổ, và mạng có <strong>0 flip-flop</strong>.
+- Charter mục 10 nói <em>"Mạng 3 phần tử = 3 bộ so sánh"</em> — đúng, và 15 cell <code>maj3_1</code> là chứng
+  cứ vật lý cho ba chuỗi mượn.</p>
+<p><strong>Những con số này KHÔNG chứng minh:</strong>
+- <strong>Không</strong> chứng minh mạch làm đúng chức năng — mô phỏng dừng ở chu kỳ thứ tư, <strong>và</strong> đã
+  phán xử rằng thiết kế sai.
+- <strong>Không</strong> chứng minh "G03 chạy được ở 100 MHz". <code>7,82 ns</code> <strong>chưa có ký sinh dây</strong>, chỉ
+  <strong>một</strong> góc PVT <code>tt_025C_1v80</code>, <strong>skew = 0</strong>.
+- <strong>Không</strong> chứng minh công suất thật của ứng dụng.</p>
+<p><strong>Ba con số đáng bàn nhất:</strong></p>
+<p><em>(a) Slack 2,10 ns — mỏng nhất nhóm G</em> (G01 5,36 · G02 5,48 · G04 3,16). Đường tới hạn chiếm
+<strong>78,2 %</strong> chu kỳ. Cộng thêm ba điểm fanout cao trên đường (27, 13, 13) chưa tính ký sinh
+dây, <strong>G03 là đề có nguy cơ vi phạm timing cao nhất nhóm sau khi P&amp;R</strong>.</p>
+<p><em>(b) Công suất tổ hợp 32,0 % — cao nhất trong ba đề lọc</em> (G01 22,7 %, G02 18,1 %). Đúng với
+chân dung "logic nặng, nhớ nhẹ". Một phần là do mạng sắp xếp <strong>không bị gating</strong>: nó chạy
+liên tục kể cả khi <code>valid_in = 0</code> (<code>control.md</code> §3).</p>
+<p><em>(c) 15/15 cell <code>maj3_1</code> nằm trên một đường.</em> Đây là số liệu có thể kiểm lại trong ba mươi
+giây và nó tóm tắt toàn bộ bản chất của đề.</p>
+<h2 id="7-tra-loi-cac-cau-hoi-ky-thuat-cua-charter-muc-2">7. Trả lời các câu hỏi kỹ thuật của Charter (mục 2)</h2>
+<p><strong>Câu 1 — Mạng sắp xếp ba phần tử gồm mấy bộ so sánh và mấy bộ ghép kênh?</strong>
+✅ <strong>Trả lời được, và có hai đáp án đúng:</strong>
+- <strong>3 bộ so sánh</strong> (<code>a&lt;=b</code>, <code>hi1&lt;=c</code>, <code>lo1&lt;=lo2</code>) — khớp Charter mục 10.
+- <strong>6 bộ ghép kênh 8 bit viết trong RTL</strong>, nhưng chỉ <strong>4 sống</strong> trong phần cứng (<code>hi2</code> và
+  <code>lo3</code> là mã chết, bị Yosys loại). Netlist có <code>mux2i_1 × 18</code> vì ABC đã gộp phần lớn logic
+  mux vào cell phức hợp — <strong>không đếm mux bằng cách đếm cell <code>mux*</code></strong>.</p>
+<p><strong>Câu 2 — So kết quả trung vị với trung bình trên chuỗi có một xung đột biến?</strong>
+✅ <strong>Trả lời được bằng số đã chạy PASS.</strong> Chuỗi <code>10, 11, 250</code>:
+trung vị → <strong>11</strong>; trung bình → <strong>90</strong>. Nền tín hiệu ≈ 10,5 ⟹ trung vị lệch <strong>0,5</strong>, trung
+bình lệch <strong>79,5</strong> — <strong>gấp 159 lần</strong>. Nguồn: <code>reference_model.test_impulse</code> và
+<code>test_mean_difference</code>, <code>python_reference_run.log</code> = PASS.
+⚠️ Ở mức <strong>Verilog</strong> ca này bị chặn bởi lỗi off-by-one (nó nằm đúng ở <code>send(250,1,11)</code>).</p>
+<p><strong>Câu 3 — Vì sao đề cấm dùng vòng lặp sắp xếp ở mức hành vi?</strong>
+✅ <strong>Trả lời được.</strong> Lý do <strong>không</strong> phải "không tổng hợp được" — vòng lặp có số lần chạy cố
+định thì tổng hợp được. Lý do thật là: vòng lặp <strong>che giấu cấu trúc phần cứng</strong>. Số bộ so
+sánh, số tầng, độ sâu tổ hợp trở nên vô hình trong mã ⟹ không trả lời được câu 1, không dự
+đoán được đường tới hạn, không đối chiếu được với STA. Còn vòng lặp có số lần chạy <strong>phụ
+thuộc dữ liệu</strong> thì thật sự không tổng hợp được.</p>
+<h2 id="8-tra-loi-cau-phan-tich-rieng-charter-muc-9">8. Trả lời câu phân tích riêng (Charter mục 9)</h2>
+<p>Câu hỏi có hai nửa.</p>
+<p><strong>Nửa 1 — chứng minh trung vị loại nhiễu xung tốt hơn:</strong> ✅ đã chứng minh bằng số ở §7 câu 2.
+Kèm theo <strong>giới hạn bắt buộc phải nêu</strong>: cửa sổ 3 chỉ loại được xung <strong>cô lập</strong>. Với hai xung
+liên tiếp (<code>10, 250, 250</code>) trung vị cho <strong>250</strong> — xung lọt qua. Ca này (<strong>CC-9</strong>) <strong>chưa được
+kiểm</strong> ở cả testbench lẫn mô hình Python.</p>
+<p><strong>Nửa 2 — so diện tích với G01 để nêu cái giá phải trả:</strong> ✅ đã làm, và kết quả <strong>ngược với
+giả định ngầm của Charter</strong>:</p>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>Chỉ số</th>
+<th style="text-align: right;">G03 (trung vị 3)</th>
+<th style="text-align: right;">G01 (trung bình 4)</th>
+<th>Chênh</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>Diện tích</td>
+<td style="text-align: right;"><strong>1576,512 µm²</strong></td>
+<td style="text-align: right;">2623,7664 µm²</td>
+<td><strong>−39,9 %</strong></td>
+</tr>
+<tr>
+<td>Flip-flop</td>
+<td style="text-align: right;">27</td>
+<td style="text-align: right;">58</td>
+<td>−53,4 %</td>
+</tr>
+<tr>
+<td>Công suất</td>
+<td style="text-align: right;">1,76e-04 W</td>
+<td style="text-align: right;">3,28e-04 W</td>
+<td>−46,3 %</td>
+</tr>
+<tr>
+<td><strong>Arrival</strong></td>
+<td style="text-align: right;"><strong>7,82 ns</strong></td>
+<td style="text-align: right;"><strong>4,56 ns</strong></td>
+<td><strong>+71,5 %</strong></td>
+</tr>
+<tr>
+<td>Slack</td>
+<td style="text-align: right;">2,10 ns</td>
+<td style="text-align: right;">5,36 ns</td>
+<td>−60,8 %</td>
+</tr>
+</tbody>
+</table></div>
+<blockquote>
+<p><strong>Cái giá phải trả của trung vị là THỜI GIAN, không phải DIỆN TÍCH.</strong> Trung vị bỏ được bộ
+tích luỹ, bộ đệm vòng, con trỏ và cây mux đọc — nên nhỏ hơn. Nhưng nó phải mắc <strong>ba chuỗi
+mượn nối tiếp</strong>, nên chậm hơn.</p>
+</blockquote>
+<p>⚠️ <strong>Trung thực về phép so này:</strong> G01 có cửa sổ <strong>4</strong>, G03 có cửa sổ <strong>3</strong> — phép so trộn hai
+biến. Phép so công bằng hơn (trung vị 3 với <strong>trung bình 3</strong>) <strong>chưa chạy</strong>.</p>
+<h2 id="9-nhung-cho-sinh-vien-hay-sai-va-cach-phat-hien">9. Những chỗ sinh viên hay sai và cách phát hiện</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Sai lầm</th>
+<th>Hậu quả</th>
+<th>Phát hiện bằng bằng chứng nào</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td><strong>Ngưỡng <code>count_q &gt;= 1</code> thay vì <code>&gt;= 2</code></strong></td>
+<td>Xuất một kết quả hợp lệ <strong>giả</strong> ở mẫu thứ hai, tính từ cửa sổ có giá trị reset <code>0</code></td>
+<td>🔴 <strong>Đây là lỗi thật của đề.</strong> Ca <code>send(11,0,0)</code> bắt ngay. Quy tắc nhớ: ngưỡng = <code>N − 1</code>; đối chiếu G02 dùng <code>&gt;= 7</code> cho <code>N = 8</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>Viết <code>sort()</code> hoặc <code>for</code>+swap</td>
+<td>Cấu trúc phần cứng <strong>vô hình</strong> trong mã</td>
+<td>Thử trả lời "mấy bộ so sánh, mấy tầng?" — không trả lời được từ mã</td>
+</tr>
+<tr>
+<td>3</td>
+<td>Dùng <code>&lt;</code> ở một CE và <code>&lt;=</code> ở CE khác</td>
+<td>Sai ở ca <strong>trùng lặp</strong> (<code>median3(2,9,2)</code>)</td>
+<td>Ca CC-6 trong TB: <code>send(2,1,2); send(9,1,2); send(2,1,2);</code></td>
+</tr>
+<tr>
+<td>4</td>
+<td>Khai <code>logic signed [7:0]</code></td>
+<td><code>255</code> thành <code>−1</code> ⟹ <code>median3(0,255,128)</code> ra <code>0</code> thay vì <code>128</code></td>
+<td>Ca biên CC-7 trong TB: <code>send(0,…); send(255,…); send(128,1,128);</code></td>
+</tr>
+<tr>
+<td>5</td>
+<td>Nối nhầm CE3 thành <code>CE(hi1, lo2)</code> thay vì <code>CE(lo1, lo2)</code></td>
+<td>Ra <strong>max</strong> thay vì trung vị ở một số hoán vị</td>
+<td>Ca CC-5 (ba hoán vị liên tiếp <code>3,1,2</code>). Một chuỗi hằng sẽ <strong>không</strong> bắt được</td>
+</tr>
+<tr>
+<td>6</td>
+<td>Tưởng <code>median_out</code> thuộc mạng sắp xếp</td>
+<td>Kết luận sai rằng "mạng có flip-flop"</td>
+<td>Netlist: mạng là <code>assign</code> thuần, 0 FF. <code>median_out</code> là thanh ghi <strong>sau</strong> mạng</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Đếm mux bằng cách đếm cell <code>mux2i_1</code></td>
+<td>Ra 18, không khớp lý thuyết 32</td>
+<td>ABC gộp mux vào <code>a21oi_1</code>/<code>a21o_1</code>/<code>o21a_1</code>. Phải đếm từ <strong>RTL</strong> rồi đối chiếu diện tích</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Xoá <code>hi2</code>/<code>lo3</code> vì "mã chết, tốn diện tích"</td>
+<td>Không tốn gì cả, và mất tính đối xứng</td>
+<td>Netlist <strong>không</strong> chứa mux nào cho chúng</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Phát biểu "trung vị loại được mọi nhiễu xung"</td>
+<td>Sai — <strong>hai xung liên tiếp lọt qua</strong></td>
+<td>Tính tay: <code>median3(250,250,10) = 250</code>. Ca CC-9 <strong>chưa có</strong>, phải bổ sung</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Kết luận "trung vị đắt hơn trung bình" theo cảm tính</td>
+<td>Số liệu nói ngược: G03 nhỏ hơn G01 <strong>39,9 %</strong></td>
+<td>So bảng §8</td>
+</tr>
+<tr>
+<td>11</td>
+<td>Tin rằng assertion hiện có đủ để bắt lỗi</td>
+<td><code>valid_out \|-&gt; $past(valid_in)</code> <strong>vẫn đúng</strong> với RTL lỗi</td>
+<td><code>known_issues.md</code> §5</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="10-cau-hoi-mentor-nen-dat-khi-bao-ve">10. Câu hỏi mentor nên đặt khi bảo vệ</h2>
+<div class="tablewrap"><table>
+<thead>
+<tr>
+<th>#</th>
+<th>Câu hỏi</th>
+<th>Đáp án mong đợi</th>
+</tr>
+</thead>
+<tbody>
+<tr>
+<td>1</td>
+<td>Cửa sổ dài 3 thì ngưỡng phát hành phải là bao nhiêu, và vì sao?</td>
+<td><code>count_q &gt;= N − 1 = 2</code>. <code>count_q</code> đếm mẫu <strong>đã nhận trước đó</strong>; mẫu hiện tại là thứ <code>count_q+1</code></td>
+</tr>
+<tr>
+<td>2</td>
+<td>RTL viết <code>&gt;= 1</code>. Đó là lỗi hay lựa chọn thiết kế? Chứng minh.</td>
+<td><strong>Lỗi.</strong> Ba nguồn độc lập chống lại: mô hình chuẩn (<code>len&lt;3</code>), testbench (<code>send(11,0,0)</code>), toán học (trung vị 3 điểm cần 3 điểm). Và chính dòng 49 của RTL dùng đúng hằng <code>2</code></td>
+</tr>
+<tr>
+<td>3</td>
+<td>Mạch thật sự xuất ra giá trị gì ở mẫu thứ hai?</td>
+<td><code>min(s(1), s(2))</code>. Vì <code>max(min(0,b), min(max(0,b),c)) = max(0, min(b,c)) = min(b,c)</code> với <code>b,c</code> không dấu</td>
+</tr>
+<tr>
+<td>4</td>
+<td>Mạng sắp xếp 3 phần tử gồm mấy bộ so sánh, mấy mux?</td>
+<td>3 bộ so sánh; <strong>6 mux viết ra, 4 mux sống</strong> (<code>hi2</code>, <code>lo3</code> là mã chết)</td>
+</tr>
+<tr>
+<td>5</td>
+<td>Vì sao G03 nhỏ hơn G01 mà lại chậm hơn?</td>
+<td>Nhỏ vì bỏ được bộ tích luỹ + bộ đệm vòng + con trỏ + mux đọc. Chậm vì <strong>ba chuỗi mượn 8 bit mắc nối tiếp</strong></td>
+</tr>
+<tr>
+<td>6</td>
+<td>Chứng minh "cả 15 cell <code>maj3_1</code> nằm trên đường tới hạn".</td>
+<td>Đếm <code>maj3_1</code> ở <code>synth_stat.txt</code> = 15; đếm trong danh sách cell đường tới hạn = 6 + 2 + 7 = 15</td>
+</tr>
+<tr>
+<td>7</td>
+<td>Vì sao startpoint là <code>b[0]</code> chứ không phải <code>b[7]</code>?</td>
+<td>Bit <strong>thấp nhất</strong> là đầu chuỗi mượn ⟹ đường dài nhất</td>
+</tr>
+<tr>
+<td>8</td>
+<td>Vì sao dự đoán đường tới hạn ở G03 khớp với STA, còn ở G02 thì sai hẳn?</td>
+<td>G03 <strong>không có tự do đại số</strong> — ba CE phụ thuộc nhau bắt buộc. G02 có <code>a+b−c</code> mà ABC dựng được nén carry-save 3:2</td>
+</tr>
+<tr>
+<td>9</td>
+<td>Vì sao đề cấm <code>sort()</code>?</td>
+<td>Vì nó <strong>che giấu cấu trúc</strong>, không phải vì không tổng hợp được</td>
+</tr>
+<tr>
+<td>10</td>
+<td>Trung vị có loại được <strong>mọi</strong> nhiễu xung không?</td>
+<td><strong>Không.</strong> Cửa sổ 3 chỉ loại được xung <strong>cô lập</strong>; hai xung liên tiếp lọt qua. Cần <code>N ≥ 2m+1</code> cho <code>m</code> xung — nhưng <code>N ≥ 5</code> nằm ngoài phạm vi</td>
+</tr>
+<tr>
+<td>11</td>
+<td><code>median_out</code> có nằm trong mạng sắp xếp không?</td>
+<td><strong>Không</strong> — nó là thanh ghi đầu ra <strong>sau</strong> mạng. Mạng có 0 flip-flop</td>
+</tr>
+<tr>
+<td>12</td>
+<td>Nếu áp bản vá thì phải chạy lại những gì?</td>
+<td><strong>Toàn bộ tầng 06_GDSII</strong> (synthesis, STA, power) vì vá đụng RTL, cộng mọi tài liệu chứa số</td>
+</tr>
+<tr>
+<td>13</td>
+<td>Số <code>7,82 ns</code> cho phép kết luận gì về tần số?</td>
+<td><strong>Không gì cả.</strong> Chưa ký sinh dây, một góc PVT, skew = 0, và có ba điểm fanout cao (27/13/13) sẽ tệ hơn sau routing</td>
+</tr>
+</tbody>
+</table></div>
+<h2 id="11-gioi-han-da-chung-minh-duoc-gi-chua-chung-minh-duoc-gi">11. Giới hạn: đã chứng minh được gì, chưa chứng minh được gì</h2>
+<p><strong>Đã chứng minh:</strong>
+- Hàm <code>median3</code> đúng trên <strong>cả 6 hoán vị</strong> và các ca trùng lặp — chứng minh vét cạn, không
+  phải mô phỏng mẫu (<code>reference_model</code>, PASS).
+- Trung vị loại nhiễu xung tốt hơn trung bình, <strong>bằng số của chính hồ sơ</strong>: <code>11</code> so với <code>90</code>
+  trên cùng chuỗi <code>10, 11, 250</code>.
+- RTL tổng hợp được ra 189 standard cell sky130, <strong>27 flip-flop khớp chính xác</strong> tính tay.
+- Mạng sắp xếp là <strong>tổ hợp thuần</strong> (0 flip-flop) — đúng Charter mục 10.
+- Đường tới hạn ở mức sau tổng hợp: <code>b[0] → median_out[1]</code>, 28 cell, 7,82 ns, và <strong>15/15
+  cell <code>maj3_1</code> nằm trên đó</strong>.
+- So sánh diện tích với G01 đã hoàn thành, với kết luận ngược với giả định ban đầu.
+- 🔴 Lỗi mô phỏng đã được <strong>định vị và phán xử</strong>: <strong>lỗi nằm trong DUT</strong>, bản vá là một ký tự.</p>
+<p><strong>Chưa chứng minh:</strong>
+- <strong>Chức năng của RTL — và đã biết là SAI</strong> ở mẫu thứ hai sau reset. REQ-G03-001 <strong>CHƯA THOẢ</strong>.
+- Ca <strong>hai xung liên tiếp</strong> (CC-9) — giới hạn quan trọng nhất của đề, <strong>chưa kiểm ở đâu cả</strong>.
+- Ca chuỗi tăng dần thuần và ca ba mẫu bằng nhau ở mức Verilog.
+- Phép so <strong>công bằng</strong> trung vị 3 với trung bình 3 — chưa chạy.
+- Số liệu <strong>sau khi vá</strong> — toàn bộ tầng 06_GDSII phải chạy lại.
+- Netlist tương đương RTL — chưa mô phỏng gate-level.
+- Biên an toàn qua các góc PVT — ⚠️ <strong>đặc biệt đáng lo với slack chỉ 2,10 ns</strong>.
+- Độ trễ thật sau routing — ba điểm fanout cao chưa được tính ký sinh dây.
+- Ánh xạ chân Charter mục 4 — <strong>chưa có vỏ <code>tt_um_*</code></strong>; xung đột <code>uio[0]</code> chưa được quyết.
+- Layout, DRC, LVS, GDSII — chưa chạy flow vật lý.</p>
+<hr>
+<p><em>Phiên bản: v1.0 · Ngày: 2026-09-24</em></p>
+</main>
+<footer class="doc">
+  Tài liệu sinh từ <code>implementation-notes_G03.md</code>.
+  Mọi số liệu đều kèm công cụ, phiên bản và lệnh tái lập trong
+  <code>07_TRACEABILITY/evidence_index.md</code>.
+</footer>
+</div>
+<script>
+(function(){
+  var b=document.createElement('button');
+  b.className='themebtn'; b.type='button';
+  function lbl(){var t=document.documentElement.getAttribute('data-theme');
+    return t==='dark'?'Nen sang':(t==='light'?'Nen toi':'Doi nen');}
+  b.textContent=lbl();
+  try{var s=localStorage.getItem('rtl2gds-theme'); if(s)document.documentElement.setAttribute('data-theme',s);}catch(e){}
+  b.textContent=lbl();
+  b.addEventListener('click',function(){
+    var cur=document.documentElement.getAttribute('data-theme');
+    var mq=window.matchMedia('(prefers-color-scheme: dark)').matches;
+    var next=cur?(cur==='dark'?'light':'dark'):(mq?'light':'dark');
+    document.documentElement.setAttribute('data-theme',next);
+    try{localStorage.setItem('rtl2gds-theme',next);}catch(e){}
+    b.textContent=lbl();
+  });
+  document.body.appendChild(b);
+})();
+</script>
+</body>
+</html>

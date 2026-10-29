@@ -1,0 +1,35 @@
+# Python
+__pycache__/
+*.pyc
+.venv/
+venv/
+
+# Simulation outputs
+*.vcd
+*.fst
+*.lxt
+*.lxt2
+
+# Temporary files and logs
+*.tmp
+*.bak
+*.swp
+*.log
+
+# LibreLane/OpenLane generated runs
+04_IMPLEMENTATION/runs/
+
+# Generated layout and physical design files
+*.gds
+*.gds.gz
+*.lef
+*.def
+*.odb
+*.spef
+*.sdf
+*.lib
+*.rpt
+
+# Operating system
+.DS_Store
+Thumbs.db
