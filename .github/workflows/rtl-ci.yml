@@ -1,0 +1,37 @@
+name: G03 RTL CI
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  simulation:
+    name: Icarus Verilog Simulation
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout repository
+        uses: actions/checkout@v4
+
+      - name: Install Icarus Verilog
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y iverilog
+
+      - name: Compile RTL and testbench
+        run: |
+          mkdir -p build
+          iverilog -g2012 -Wall \
+            -s g03_tb \
+            -o build/g03_tb.vvp \
+            04_IMPLEMENTATION/rtl/g03_median3.sv \
+            05_VERIFICATION/testbench/g03_tb.sv
+
+      - name: Run simulation
+        run: |
+          set -o pipefail
+          vvp build/g03_tb.vvp | tee build/simulation.log
+          grep -q "G03 TB PASS: 319 checks" build/simulation.log
